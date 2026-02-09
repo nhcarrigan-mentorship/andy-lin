@@ -169,7 +169,7 @@ function Kits() {
             .filter((card) => card._id)
             .map((card) => (
               <Link to={`/kits/${card._id}`} key={card._id}>
-                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 h-120 group">
+                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 h-135 group">
                   <img
                     src={card.imageUrl}
                     className="w-[95%] mx-auto pt-2 transition duration-300 group-hover:brightness-50 rounded-xl"

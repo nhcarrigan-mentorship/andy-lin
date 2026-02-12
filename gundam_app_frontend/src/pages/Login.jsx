@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function Login() {
   const [form, setForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -15,10 +15,28 @@ function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const [message, setMessage] = useState("")
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", form);
+
+    try {
+      const res = await fetch("http://localhost:5000/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      setMessage(data.message);
+    } catch (err) {
+      setMessage("Server error");
+    }
   };
+
 
   return (
     <div className="font-bold">
@@ -28,15 +46,15 @@ function Login() {
           onSubmit={handleSubmit}
           className="p-4 flex flex-col gap-2 max-w-sm font-sans"
         >
-          <label className="text-2xl" htmlFor="username">
-            Enter your username:
+          <label className="text-2xl" htmlFor="email">
+            Enter your email:
           </label>
           <input
             type="text"
-            name="username"
-            value={form.username}
+            name="email"
+            value={form.email}
             onChange={handleChange}
-            placeholder="Username"
+            placeholder="Email"
             className="border rounded-lg p-2 bg-gray-300 w-96 mb-3"
           />
 
@@ -52,13 +70,21 @@ function Login() {
             className="border rounded-lg p-2 bg-gray-300 w-96 mb-3"
           />
 
+          {message && (
+            <p
+              className="mb-1 text-center text-xl"
+            >
+              {message}
+            </p>
+          )}
+
           <button
             type="submit"
             className="bg-blue-700 border text-white rounded-xl p-2 hover:bg-blue-900 w-96"
           >
             Log In
           </button>
-          <h1>Don't have an account?</h1>
+          <h1>Make an account?</h1>
           <Link
             to="/signup"
             className="bg-gray-700 border text-white rounded-xl p-2 hover:bg-gray-900 text-center w-96"

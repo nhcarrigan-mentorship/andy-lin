@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 function Signup() {
   const [form, setForm] = useState({
+    email: "",
     username: "",
     password: "",
   });
@@ -15,15 +16,37 @@ function Signup() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signup data:", form);
+
+    if (!form.email || !form.username || !form.password) {
+      setMessage("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/users/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      setMessage(data.message);
+    } catch (err) {
+      setMessage("Network error");
+    }
   };
 
   return (
     <div className="font-bold">
       <h1 className="text-center text-4xl p-4 font-serif">Sign Up</h1>
-      <div id="login_block" className="flex justify-center mt-10">
+      <div id="login_block" className="flex justify-center mt-20">
         <form
           onSubmit={handleSubmit}
           className="p-4 flex flex-col gap-2 max-w-sm font-sans"
@@ -62,6 +85,10 @@ function Signup() {
             placeholder="Password"
             className="border rounded-lg p-2 bg-gray-300 w-96 mb-3"
           />
+
+          {message && (
+            <p className="mb-1 text-center text-xl">{message}</p>
+          )}
 
           <button
             type="submit"

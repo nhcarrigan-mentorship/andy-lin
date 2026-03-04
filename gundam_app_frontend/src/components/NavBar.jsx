@@ -4,7 +4,7 @@ function NavBar() {
   return (
     <div
       id="NavBar"
-      className="sticky top-0 bg-gray-700 flex font-bold text-2xl pl-4 font-serif"
+      className="sticky top-0 bg-gray-700 flex font-bold text-2xl pl-4 font-serif z-50"
     >
       <img src="/logo.png" className="h-10 my-auto" />
       <h1 className="my-auto text-3xl">Gunpla Collection</h1>

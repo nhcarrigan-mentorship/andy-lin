@@ -87,7 +87,7 @@ function Signup() {
           />
 
           {message && (
-            <p className="mb-1 text-center text-xl">{message}</p>
+            <p className="mb-1 text-center text-xl text-blue-500 font-semibold">{message}</p>
           )}
 
           <button

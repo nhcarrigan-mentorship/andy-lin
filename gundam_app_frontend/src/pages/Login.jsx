@@ -71,9 +71,7 @@ function Login() {
           />
 
           {message && (
-            <p
-              className="mb-1 text-center text-xl"
-            >
+            <p className="mb-1 text-center text-xl text-blue-500 font-semibold">
               {message}
             </p>
           )}

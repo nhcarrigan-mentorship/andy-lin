@@ -1,26 +1,48 @@
-import { useState } from "react";
-import { kits } from "../userKits";
+import { useState, useEffect } from "react";
+//import { kits } from "../userKits";
 
 function Collection() {
   const [showCompleted, setShowCompleted] = useState(true);
   const [showBacklog, setShowBacklog] = useState(true);
   const [showWishlist, setShowWishlist] = useState(true);
   const [query, setQuery] = useState("");
+  const [kits, setKits] = useState([]);
 
+  //kit searching
   const handleChange = (e) => {
     setQuery(e.target.value);
   };
 
+  // fetch from backend
+  useEffect(() => {
+    const fetchKits = async () => {
+      try {
+        const res = await fetch("/api/userKits", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const data = await res.json();
+        setKits(data)
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchKits();
+  }, []);
+
   const filterKits = (status) =>
     kits
       .filter(
-        (kit) =>
-          kit.status === status &&
-          kit.name.toLowerCase().includes(query.toLowerCase())
+        (userKit) =>
+          userKit.status === status &&
+          userKit.kit?.name?.toLowerCase().includes(query.toLowerCase())
       )
-      .map((kit, index) => (
-        <li key={index} className="hover:text-white">
-          {kit.name}
+      .map((userKit) => (
+        <li key={userKit._id} className="hover:text-white">
+          {userKit.kit?.name}
         </li>
       ));
 

@@ -51,7 +51,7 @@ export default function Profile({ user, currentUser }) {
 
       {isCurrentUser ? (
         <button
-          className="block mx-auto border-2 p-2 rounded-lg bg-green-600 hover:bg-green-700 w-40 text-white"
+          className="block mx-auto border-2 p-2 rounded-lg bg-green-700 hover:bg-green-800 w-40 text-white"
           onClick={() => navigate("/social")}
         >
           Social

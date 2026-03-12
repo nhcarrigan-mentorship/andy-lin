@@ -47,6 +47,27 @@ export default function KitPage() {
         <p>Kit Number: {kit.kitNumber}</p>
       </div>
 
+      <div className="my-auto column p-2 flex flex-col mr-20">
+        <button
+          type="submit"
+          className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
+        >
+          Add to Wishlist
+        </button>
+        <button
+          type="submit"
+          className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
+        >
+          Add to Backlog
+        </button>
+        <button
+          type="submit"
+          className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900"
+        >
+          Add to Completed
+        </button>
+      </div>
+
       <div className="w-1/2 border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center">
         <div className="mb-4">
           <h2 className="text-2xl font-bold">Rating:</h2>

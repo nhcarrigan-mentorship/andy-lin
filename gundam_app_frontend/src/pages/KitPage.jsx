@@ -6,6 +6,7 @@ export default function KitPage() {
   const [kit, setKit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     console.log("Kit ID:", kitId);
@@ -31,6 +32,64 @@ export default function KitPage() {
   if (loading) return <div className="p-4">Loading kit info...</div>;
   if (error || !kit) return <div className="p-4">Kit not found.</div>;
 
+async function addToCollection(kitId, status) {
+  try {
+    console.log("=== ADD TO COLLECTION START ===");
+    console.log("Kit ID:", kitId);
+    console.log("Status:", status);
+
+    const token = localStorage.getItem("token");
+    console.log("Token exists:", !!token);
+    console.log("Token value:", token);
+
+    if (!token) {
+      setMessage("You must be logged in.");
+      return;
+    }        
+
+    const res = await fetch("http://localhost:5000/api/userkits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ kitId, status }),
+    });
+
+    console.log("Response status:", res.status);
+    console.log("Response ok:", res.ok);
+
+    const contentType = res.headers.get("content-type");
+    console.log("Content-Type:", contentType);
+
+    let data;
+
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      console.log("Raw response text:", text);
+      data = text;
+    }
+
+    console.log("Response data:", data);
+
+    if (!res.ok) {
+      throw new Error(
+        data?.error || `Request failed with status ${res.status}`,
+      );
+    }
+
+    setMessage("Added successfully ✅");
+
+    console.log("=== ADD TO COLLECTION SUCCESS ===");
+  } catch (err) {
+    console.error("=== ADD TO COLLECTION ERROR ===");
+    console.error(err);
+    setMessage(err.message);
+  }
+}
+
   return (
     <div className="font-bold flex p-4">
       <div className="w-1/2 mx-auto">
@@ -49,23 +108,27 @@ export default function KitPage() {
 
       <div className="my-auto column p-2 flex flex-col mr-20">
         <button
-          type="submit"
+          onClick={() => addToCollection(kit._id, "wishlist")}
           className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
         >
           Add to Wishlist
         </button>
+
         <button
-          type="submit"
+          onClick={() => addToCollection(kit._id, "backlog")}
           className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
         >
           Add to Backlog
         </button>
+
         <button
-          type="submit"
+          onClick={() => addToCollection(kit._id, "completed")}
           className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900"
         >
           Add to Completed
         </button>
+
+        {message && <p className="mt-3 text-white text-l">{message}</p>}
       </div>
 
       <div className="w-1/2 border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center">

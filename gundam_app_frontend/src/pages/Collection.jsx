@@ -17,11 +17,16 @@ function Collection() {
   useEffect(() => {
     const fetchKits = async () => {
       try {
-        const res = await fetch("/api/userKits", {
+        const res = await fetch("http://localhost:5000/api/userkits", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
+        console.log(
+          "AUTH HEADER SENT:",
+          `Bearer ${localStorage.getItem("token")}`,
+        );
 
         const data = await res.json();
         setKits(data)
@@ -33,8 +38,8 @@ function Collection() {
     fetchKits();
   }, []);
 
-  const filterKits = (status) =>
-    kits
+const filterKits = (status) =>
+  (Array.isArray(kits) ? kits : [])
       .filter(
         (userKit) =>
           userKit.status === status &&

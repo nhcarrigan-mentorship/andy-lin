@@ -3,10 +3,11 @@ const router = express.Router();
 
 const UserKit = require("../models/UserKits");
 const auth = require("../middleware/auth");
+require("../models/Kits");
 
 router.get("/", auth, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user.id;
 
     if (!userId) {
       return res.status(401).json({ error: "Invalid user token" });
@@ -25,23 +26,18 @@ router.post("/", auth, async (req, res) => {
   try {
     const { kitId, status } = req.body;
 
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
-
-    if (!userId) {
-      return res.status(401).json({ error: "Invalid user token" });
-    }
+    const userId = req.user.id; 
 
     let userKit = await UserKit.findOne({
-      user: req.user.id,
+      user: userId,
       kit: kitId,
     });
 
-    // if no userKit, need to create; else just update
     if (!userKit) {
       userKit = new UserKit({
-        user: req.user.id,
+        user: userId,
         kit: kitId,
-        status: status,
+        status,
       });
     } else {
       userKit.status = status;
@@ -54,6 +50,6 @@ router.post("/", auth, async (req, res) => {
     console.error("USERKITS ERROR:", err);
     res.status(500).json({ error: err.message });
   }
-})
+});
 
 module.exports = router;

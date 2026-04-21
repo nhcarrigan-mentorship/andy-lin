@@ -10,7 +10,7 @@ const userKitSchema = new mongoose.Schema(
 
         kit: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Kit",
+            ref: "Gundam",
             required: true
         },
 

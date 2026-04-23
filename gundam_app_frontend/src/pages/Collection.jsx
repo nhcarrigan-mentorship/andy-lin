@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 //import { kits } from "../userKits";
 
 function Collection() {
@@ -23,13 +24,17 @@ function Collection() {
           },
         });
 
-        console.log(
-          "AUTH HEADER SENT:",
-          `Bearer ${localStorage.getItem("token")}`,
-        );
+        // console.log(
+        //   "AUTH HEADER SENT:",
+        //   `Bearer ${localStorage.getItem("token")}`,
+        // );
 
         const data = await res.json();
         setKits(data)
+        if (!res.ok) {
+          console.error("FETCH ERROR:", data);
+          return;
+        }
       } catch (err) {
         console.error(err);
       }
@@ -40,16 +45,18 @@ function Collection() {
 
 const filterKits = (status) =>
   (Array.isArray(kits) ? kits : [])
-      .filter(
-        (userKit) =>
-          userKit.status === status &&
-          userKit.kit?.name?.toLowerCase().includes(query.toLowerCase())
-      )
-      .map((userKit) => (
-        <li key={userKit._id} className="hover:text-white">
+    .filter(
+      (userKit) =>
+        userKit.status === status &&
+        userKit.kit?.name?.toLowerCase().includes(query.toLowerCase()),
+    )
+    .map((userKit) => (
+      <li key={userKit._id} className="hover:text-blue-900">
+        <Link to={`/kits/${userKit.kit._id}`} className="hover:underline">
           {userKit.kit?.name}
-        </li>
-      ));
+        </Link>
+      </li>
+    ));
 
   return (
     <div className="font-bold gap-2">

@@ -34,6 +34,7 @@ function App() {
         />
         <Route path="/profile/:userId" element={<UserProfileWrapper />} />
         <Route path="/social" element={<Social />} />
+        <Route path="/kits/:id" element={<KitPage />} />
       </Routes>
     </Router>
   );

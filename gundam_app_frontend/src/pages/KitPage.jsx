@@ -9,12 +9,12 @@ export default function KitPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    console.log("Kit ID:", kitId);
+    // console.log("Kit ID:", kitId);
     if (!kitId) return;
 
     const fetchKit = async () => {
       try {
-        console.log("Fetching kit with ID:", kitId);
+        // console.log("Fetching kit with ID:", kitId);
         const response = await fetch(`http://localhost:5000/kits/${kitId}`);
         if (!response.ok) throw new Error("Kit not found");
         const data = await response.json();
@@ -34,14 +34,12 @@ export default function KitPage() {
 
 async function addToCollection(kitId, status) {
   try {
-    console.log("=== ADD TO COLLECTION START ===");
-    console.log("Kit ID:", kitId);
-    console.log("Status:", status);
+    // console.log("=== ADD TO COLLECTION START ===");
+    // console.log("Kit ID:", kitId);
+    // console.log("Status:", status);
 
     const token = localStorage.getItem("token");
-    console.log("Token exists:", !!token);
-    console.log("Token value:", token);
-
+    
     if (!token) {
       setMessage("You must be logged in.");
       return;
@@ -56,11 +54,7 @@ async function addToCollection(kitId, status) {
       body: JSON.stringify({ kitId, status }),
     });
 
-    console.log("Response status:", res.status);
-    console.log("Response ok:", res.ok);
-
     const contentType = res.headers.get("content-type");
-    console.log("Content-Type:", contentType);
 
     let data;
 
@@ -68,7 +62,6 @@ async function addToCollection(kitId, status) {
       data = await res.json();
     } else {
       const text = await res.text();
-      console.log("Raw response text:", text);
       data = text;
     }
 
@@ -80,11 +73,40 @@ async function addToCollection(kitId, status) {
       );
     }
 
-    setMessage("Added successfully ✅");
+    setMessage("Kit Added Successfully");
 
-    console.log("=== ADD TO COLLECTION SUCCESS ===");
+    // console.log("=== ADD TO COLLECTION SUCCESS ===");
   } catch (err) {
-    console.error("=== ADD TO COLLECTION ERROR ===");
+    console.error("ADD TO COLLECTION ERROR");
+    console.error(err);
+    setMessage(err.message);
+  }
+}
+
+async function removeFromCollection(kitId) {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setMessage("You must be logged in.");
+      return;
+    }
+
+    const res = await fetch(`http://localhost:5000/api/userkits/${kitId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Failed to remove");
+    }
+
+    setMessage("Kit Removed Successfully");
+  } catch (err) {
     console.error(err);
     setMessage(err.message);
   }
@@ -123,9 +145,16 @@ async function addToCollection(kitId, status) {
 
         <button
           onClick={() => addToCollection(kit._id, "completed")}
-          className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900"
+          className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
         >
           Add to Completed
+        </button>
+
+        <button
+          onClick={() => removeFromCollection(kit._id)}
+          className="border border-2 rounded-xl bg-red-800 text-white p-2 w-50 hover:bg-red-900"
+        >
+          Remove Kit
         </button>
 
         {message && <p className="mt-3 text-white text-l">{message}</p>}

@@ -52,4 +52,25 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+router.delete("/:kitId", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { kitId } = req.params;
+
+    const deleted = await UserKit.findOneAndDelete({
+      user: userId,
+      kit: kitId,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Kit not found in collection" });
+    }
+
+    res.json({ message: "Removed from collection" });
+  } catch (err) {
+    console.error("DELETE /userkits error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

@@ -7,6 +7,10 @@ function Login() {
     password: "",
   });
 
+  const [message, setMessage] = useState("");
+
+  const token = localStorage.getItem("token");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({
@@ -14,8 +18,6 @@ function Login() {
       [name]: value,
     });
   };
-
-  const [message, setMessage] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,15 +35,42 @@ function Login() {
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
+        setMessage("Logged in successfully");
+      } else {
+        setMessage(data.message);
       }
-
-      setMessage(data.message);
     } catch (err) {
       setMessage("Server error");
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setMessage("Logged out");
+    window.location.reload(); 
+  };
 
+  // logout 
+  if (token) {
+    return (
+      <div className="font-bold text-center mt-100">
+        <h1 className="text-4xl font-serif mb-6">You are already logged in</h1>
+
+        {message && (
+          <p className="mb-4 text-xl text-blue-500 font-semibold">{message}</p>
+        )}
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-800 border text-white rounded-xl p-2 hover:bg-red-900 w-96 mt-10"
+        >
+          Log Out
+        </button>
+      </div>
+    );
+  }
+
+  // usual login
   return (
     <div className="font-bold">
       <h1 className="text-center text-4xl p-4 font-serif pb-8">Log In</h1>
@@ -86,6 +115,7 @@ function Login() {
           >
             Log In
           </button>
+
           <h1>Make an account?</h1>
           <Link
             to="/signup"

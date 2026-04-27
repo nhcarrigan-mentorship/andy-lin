@@ -9,15 +9,20 @@ function Kits() {
   const [selectedSeries, setSelectedSeries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchKits = async () => {
       try {
+        setLoading(true);
+
         const response = await fetch("http://localhost:5000/kits");
         const data = await response.json();
         setKits(data);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchKits();
@@ -79,6 +84,15 @@ function Kits() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="text-2xl font-bold animate-pulse">Loading Kits...</div>
+        <div className="mt-4 w-12 h-12 border-4 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-bold">

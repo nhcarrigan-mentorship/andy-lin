@@ -1,84 +1,88 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { username } = useParams();
 
+  const [status, setStatus] = useState("loading");
   const [profileUser, setProfileUser] = useState(null);
   const [userKits, setUserKits] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const fetchUser = async (token) => {
-    const res = await fetch("http://localhost:5000/users/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch user");
-    }
-
-    return await res.json();
-  };
-
-  const fetchUserKits = async (token) => {
-    const res = await fetch("http://localhost:5000/api/userkits", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch user kits");
-    }
-
-    return await res.json();
-  };
+  const [errorMessage, setErrorMessage] = useState("");
 
   const loadData = async () => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError("No token found");
-      setLoading(false);
-      return;
-    }
+    setStatus("loading");
 
     try {
-      setLoading(true);
-      setError("");
+      let userData;
+      let kitsData = [];
 
-      const [userData, kitsData] = await Promise.all([
-        fetchUser(token),
-        fetchUserKits(token),
-      ]);
+      if (username) {
+        const res = await fetch(`http://localhost:5000/users/${username}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "User not found");
+        }
+
+        userData = data;
+      } else {
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const [userRes, kitsRes] = await Promise.all([
+          fetch("http://localhost:5000/users/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch("http://localhost:5000/api/userkits", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+
+        const userDataJson = await userRes.json();
+        const kitsDataJson = await kitsRes.json();
+
+        if (!userRes.ok) {
+          throw new Error("Failed to fetch user");
+        }
+
+        if (!kitsRes.ok) {
+          throw new Error("Failed to fetch kits");
+        }
+
+        userData = userDataJson;
+        kitsData = kitsDataJson;
+      }
 
       setProfileUser(userData);
       setUserKits(kitsData);
+      setStatus("success");
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong loading profile");
+      setErrorMessage(err.message);
       setProfileUser(null);
       setUserKits([]);
-    } finally {
-      setLoading(false);
+      setStatus("error");
     }
   };
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [username]);
 
-  if (loading) {
+  if (status === "loading") {
     return <div className="p-4 text-center">Loading...</div>;
   }
 
-  if (error) {
+  if (status === "error") {
     return (
       <div className="p-4 text-center">
-        <p>{error}</p>
+        <p>{errorMessage}</p>
         <button className="mt-4 underline text-blue-600" onClick={loadData}>
           Retry
         </button>

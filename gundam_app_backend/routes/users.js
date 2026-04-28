@@ -79,13 +79,34 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", auth, async (req, res) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id).select("-password -email");
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
   res.json(user);
+});
+
+router.get("/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      username: req.params.username,
+    }).select("-password -email");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Get public profile error:", err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
 });
 
 module.exports = router;

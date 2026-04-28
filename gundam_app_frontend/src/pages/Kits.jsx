@@ -10,23 +10,37 @@ function Kits() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchKits = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  const fetchKits = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await fetch("http://localhost:5000/kits");
-        const data = await response.json();
-        setKits(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+      const response = await fetch("http://localhost:5000/kits");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch kits");
       }
-    };
-    fetchKits();
-  }, []);
+
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        throw new Error("No kits found");
+      }
+
+      setKits(data);
+    } catch (error) {
+      console.error(error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchKits();
+}, []);
 
   const handleChange = (e) => setQuery(e.target.value);
 
@@ -90,6 +104,14 @@ function Kits() {
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="text-2xl font-bold animate-pulse">Loading Kits...</div>
         <div className="mt-4 w-12 h-12 border-4 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-3xl font-bold">{error}</h1>
       </div>
     );
   }

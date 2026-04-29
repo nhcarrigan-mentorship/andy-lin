@@ -109,4 +109,25 @@ router.get("/:username", async (req, res) => {
   }
 });
 
+router.put("/update-pfp", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { pfpLink } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { pfpLink },
+      { new: true },
+    );
+
+    res.json({
+      message: "Profile picture updated",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
+
 module.exports = router;

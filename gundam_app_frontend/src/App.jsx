@@ -52,10 +52,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/kits/:kitId" element={<KitPage />} />
-
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
-
         <Route path="/social" element={<Social />} />
       </Routes>
     </Router>

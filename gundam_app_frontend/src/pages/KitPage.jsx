@@ -161,12 +161,12 @@ async function removeFromCollection(kitId) {
       </div>
 
       <div className="w-1/2 border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold">Rating:</h2>
+        <div className="mb-20">
+          <h2 className="text-2xl font-bold mb-1">Rating:</h2>
           <p>{kit.kitRating ?? "No rating yet"}</p>
         </div>
         <div>
-          <h2 className="text-2xl font-bold">Instructions:</h2>
+          <h2 className="text-2xl font-bold mb-1">Instructions:</h2>
           {kit.instructionsUrl ? (
             <a
               href={kit.instructionsUrl}

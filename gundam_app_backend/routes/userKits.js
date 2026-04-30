@@ -3,6 +3,7 @@ const router = express.Router();
 
 const UserKit = require("../models/UserKits");
 const auth = require("../middleware/auth");
+const User = require("../models/User");
 require("../models/Kits");
 
 router.get("/", auth, async (req, res) => {
@@ -69,6 +70,27 @@ router.delete("/:kitId", auth, async (req, res) => {
     res.json({ message: "Removed from collection" });
   } catch (err) {
     console.error("DELETE /userkits error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      username: req.params.username,
+    }).select("username pfpLink uploadedImages");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const kits = await UserKit.find({
+      user: user._id,
+    }).populate("kit");
+
+    res.json(kits);
+  } catch (err) {
+    console.error("GET user kits by username error:", err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -19,14 +19,24 @@ export default function Profile() {
       let kitsData = [];
 
       if (username) {
-        const res = await fetch(`http://localhost:5000/users/${username}`);
-        const data = await res.json();
+        const [userRes, kitsRes] = await Promise.all([
+          fetch(`http://localhost:5000/users/${username}`),
+          fetch(`http://localhost:5000/api/userkits/${username}`),
+        ]);
 
-        if (!res.ok) {
-          throw new Error(data.message || "User not found");
+        const userDataJson = await userRes.json();
+        const kitsDataJson = await kitsRes.json();
+
+        if (!userRes.ok) {
+          throw new Error(userDataJson.message || "User not found");
         }
 
-        userData = data;
+        if (!kitsRes.ok) {
+          throw new Error(kitsDataJson.message || "Failed to fetch user kits");
+        }
+
+        userData = userDataJson;
+        kitsData = kitsDataJson;
       } else {
         if (!token) {
           throw new Error("No token found");
@@ -104,7 +114,7 @@ export default function Profile() {
 
   return (
     <div className="font-bold gap-2">
-      <h1 className="text-center text-4xl p-4 font-serif pb-8">Profile</h1>
+      <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">Profile</h1>
 
       <img
         src={profileUser.pfpLink || "/default-pfp.png"}
@@ -121,7 +131,7 @@ export default function Profile() {
       </h2>
 
       <button
-        className="block mx-auto border-2 p-2 w-50 rounded-lg bg-green-700 text-white"
+        className="block mx-auto border-2 p-2 w-50 rounded-lg bg-green-700 text-white hover:bg-green-900"
         onClick={() => navigate("/social")}
       >
         Social

@@ -50,19 +50,57 @@ function Login() {
     window.location.reload(); 
   };
 
+    const handlePfpSubmit = async (e) => {
+      e.preventDefault();
+
+      try {
+        const res = await fetch("http://localhost:5000/users/update-pfp", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            pfpLink: form.pfpLink,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setMessage("Profile picture updated");
+        } else {
+          setMessage(data.message);
+        }
+      } catch (err) {
+        setMessage("Server error");
+      }
+    };
+
   // logout 
   if (token) {
     return (
-      <div className="font-bold text-center mt-100">
-        <h1 className="text-4xl font-serif mb-6">You are already logged in</h1>
+      <div className="font-bold text-center mt-50">
+        <h1 className="text-4xl font-serif mt-6">Profile Pic Link</h1>
+
+        <form onSubmit={handlePfpSubmit}>
+          <input
+            type="text"
+            name="pfpLink"
+            value={form.pfpLink || ""}
+            onChange={handleChange}
+            placeholder="Profile Pic Link"
+            className="block mx-auto mt-5 w-[20%] border-3 bg-gray-300 rounded-xl p-2"
+          />
+        </form>
 
         {message && (
-          <p className="mb-4 text-xl text-blue-500 font-semibold">{message}</p>
+          <p className="mt-20 text-xl text-blue-500 font-semibold">{message}</p>
         )}
 
         <button
           onClick={handleLogout}
-          className="bg-red-800 border text-white rounded-xl p-2 hover:bg-red-900 w-96 mt-10"
+          className="bg-red-800 border text-white rounded-xl p-2 hover:bg-red-900 w-96 mt-25"
         >
           Log Out
         </button>

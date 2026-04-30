@@ -120,8 +120,7 @@ useEffect(() => {
     <div className="font-bold">
       <h1 className="text-center text-4xl p-4 font-serif pb-8">Kits</h1>
 
-      {/* Query */}
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <input
           type="text"
           value={query}
@@ -131,7 +130,6 @@ useEffect(() => {
         />
       </form>
 
-      {/* Filter */}
       <div id="content" className="flex pt-6">
         <div className="pl-4 mr-3">
           <button
@@ -195,11 +193,11 @@ useEffect(() => {
                   </label>
                 ))}
               </div>
+
             </div>
           )}
         </div>
 
-        {/* Kit Boxes */}
         <div className="grid grid-cols-4 gap-4">
           {paginatedCards
             .filter((card) => card._id)
@@ -217,7 +215,6 @@ useEffect(() => {
             ))}
         </div>
 
-        {/* Pages */}
         <div className="justify-center mr-4 w-auto whitespace-nowrap pr-4 ml-4">
           <span className="text-xl block pb-2">
             Page {currentPage} of {totalPages}
@@ -237,8 +234,6 @@ useEffect(() => {
             Next
           </button>
         </div>
-        {/* End */}
-
       </div>
     </div>
   );

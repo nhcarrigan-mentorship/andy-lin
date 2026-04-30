@@ -16,7 +16,7 @@ export default function Social() {
     <div className="p-4 font-bold">
       <h1 className="text-4xl text-center pb-8">Social</h1>
 
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <input
           type="text"
           value={query}

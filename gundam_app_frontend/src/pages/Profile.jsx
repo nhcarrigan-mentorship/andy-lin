@@ -107,7 +107,7 @@ export default function Profile() {
       <h1 className="text-center text-4xl p-4 font-serif pb-8">Profile</h1>
 
       <img
-        src={profileUser.profilePic}
+        src={profileUser.pfpLink || "/default-pfp.png"}
         alt="Profile"
         className="mx-auto rounded-full object-cover h-50 w-50 border-3"
       />
@@ -121,7 +121,7 @@ export default function Profile() {
       </h2>
 
       <button
-        className="block mx-auto border-2 p-2 rounded-lg bg-green-700 text-white"
+        className="block mx-auto border-2 p-2 w-50 rounded-lg bg-green-700 text-white"
         onClick={() => navigate("/social")}
       >
         Social

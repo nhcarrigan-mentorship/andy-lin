@@ -14,7 +14,7 @@ function Collection() {
     setQuery(e.target.value);
   };
 
-  // fetch from backend
+  //fetch from backend
   useEffect(() => {
     const fetchKits = async () => {
       try {
@@ -23,11 +23,6 @@ function Collection() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-
-        // console.log(
-        //   "AUTH HEADER SENT:",
-        //   `Bearer ${localStorage.getItem("token")}`,
-        // );
 
         const data = await res.json();
         setKits(data)
@@ -74,7 +69,7 @@ const filterKits = (status) =>
 
       <div id="completed" className="pb-4 pt-8">
         <h1
-          className="pl-4 text-3xl underline bg-blue-700 font-serif cursor-pointer"
+          className="pl-4 text-3xl underline bg-blue-800 font-serif cursor-pointer"
           onClick={() => setShowCompleted(!showCompleted)}
         >
           Completed
@@ -90,7 +85,7 @@ const filterKits = (status) =>
 
       <div id="backlog" className="pb-4">
         <h1
-          className="pl-4 text-3xl underline bg-yellow-700 font-serif cursor-pointer"
+          className="pl-4 text-3xl underline bg-yellow-800 font-serif cursor-pointer"
           onClick={() => setShowBacklog(!showBacklog)}
         >
           Backlog
@@ -106,7 +101,7 @@ const filterKits = (status) =>
 
       <div id="wishlist" className="pb-4">
         <h1
-          className="pl-4 text-3xl underline bg-red-700 font-serif cursor-pointer"
+          className="pl-4 text-3xl underline bg-red-800 font-serif cursor-pointer"
           onClick={() => setShowWishlist(!showWishlist)}
         >
           Wishlist

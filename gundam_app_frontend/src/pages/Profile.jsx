@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -9,6 +9,12 @@ export default function Profile() {
   const [profileUser, setProfileUser] = useState(null);
   const [userKits, setUserKits] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [showCompleted, setShowCompleted] = useState(true);
+  const [showBacklog, setShowBacklog] = useState(true);
+  const [showWishlist, setShowWishlist] = useState(true);
+  const [query, setQuery] = useState("");
+  const [showCollection, setShowCollection] = useState(true);
 
   const loadData = async () => {
     const token = localStorage.getItem("token");
@@ -112,10 +118,31 @@ export default function Profile() {
     (kit) => kit.status === "backlog",
   ).length;
 
+  const filterKits = (status) =>
+    userKits
+      .filter(
+        (userKit) =>
+          userKit.status === status &&
+          userKit.kit?.name?.toLowerCase().includes(query.toLowerCase()),
+      )
+      .map((userKit) => (
+        <li key={userKit._id} className="hover:text-blue-900">
+          <Link
+            to={`/kits/${userKit.kit._id}`}
+            className="hover:underline"
+          >
+            {userKit.kit?.name}
+          </Link>
+        </li>
+      ));
+
   return (
     <div className="font-bold gap-2">
-      <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">Profile</h1>
+      <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">
+        Profile
+      </h1>
 
+      {/*user pfp*/}
       <img
         src={profileUser.pfpLink || "/default-pfp.png"}
         alt="Profile"
@@ -137,6 +164,7 @@ export default function Profile() {
         Social
       </button>
 
+      {/*user uploaded images*/}
       <div className="flex flex-wrap justify-center gap-8 p-4">
         {profileUser.uploadedImages?.map((item, index) => (
           <div key={index} className="p-2 border-2 rounded">
@@ -144,6 +172,81 @@ export default function Profile() {
             <div className="text-center">{item.name}</div>
           </div>
         ))}
+
+        {/*user collection*/}
+        <div id="pfp_collection" className="pt-6 w-full">
+          <h1
+            className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+            onClick={() => setShowCollection(!showCollection)}
+          >
+            Collection
+          </h1>
+
+          {showCollection && (
+            <>
+              <form className="pt-6">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="block mx-auto w-1/4 border-3 bg-gray-300 rounded-xl p-2"
+                />
+              </form>
+
+              <div id="completed" className="pb-4 pt-8">
+                <h1
+                  className="pl-4 text-3xl underline bg-blue-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowCompleted(!showCompleted)}
+                >
+                  Completed
+                </h1>
+
+                {showCompleted && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("completed")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div id="backlog" className="pb-4">
+                <h1
+                  className="pl-4 text-3xl underline bg-yellow-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowBacklog(!showBacklog)}
+                >
+                  Backlog
+                </h1>
+
+                {showBacklog && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("backlog")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div id="wishlist" className="pb-4">
+                <h1
+                  className="pl-4 text-3xl underline bg-red-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowWishlist(!showWishlist)}
+                >
+                  Wishlist
+                </h1>
+
+                {showWishlist && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("wishlist")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

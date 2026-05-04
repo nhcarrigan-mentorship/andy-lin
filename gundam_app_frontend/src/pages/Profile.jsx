@@ -15,6 +15,7 @@ export default function Profile() {
   const [showWishlist, setShowWishlist] = useState(true);
   const [query, setQuery] = useState("");
   const [showCollection, setShowCollection] = useState(true);
+  const [showPosts, setShowPosts] = useState(true);
 
   const loadData = async () => {
     const token = localStorage.getItem("token");
@@ -142,7 +143,7 @@ export default function Profile() {
         Profile
       </h1>
 
-      {/*user pfp*/}
+    {/*user pfp*/}
       <img
         src={profileUser.pfpLink || "/default-pfp.png"}
         alt="Profile"
@@ -164,17 +165,26 @@ export default function Profile() {
         Social
       </button>
 
-      {/*user uploaded images*/}
-      <div className="flex flex-wrap justify-center gap-8 p-4">
-        {profileUser.uploadedImages?.map((item, index) => (
-          <div key={index} className="p-2 border-2 rounded">
-            <img src={item.image} alt={item.name} />
-            <div className="text-center">{item.name}</div>
-          </div>
-        ))}
+    {/*user posts*/}
+      <div id="profile_posts" className="pt-8 w-full">
+        <h1
+          className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+          onClick={() => setShowPosts(!showPosts)}
+        >
+          Posts
+        </h1>
+        
+        <div className="flex flex-wrap justify-center gap-8 p-4">
+          {profileUser.uploadedImages?.map((item, index) => (
+            <div key={index} className="p-2 border-2 rounded">
+              <img src={item.image} alt={item.name} />
+              <div className="text-center">{item.name}</div>
+            </div>
+          ))}
+        </div>
 
-        {/*user collection*/}
-        <div id="pfp_collection" className="pt-6 w-full">
+      {/*user collection*/}
+        <div id="profile_collection" className="pt-6 w-full">
           <h1
             className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
             onClick={() => setShowCollection(!showCollection)}

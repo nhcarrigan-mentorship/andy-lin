@@ -175,16 +175,16 @@ export default function Profile() {
         </h1>
 
         {showPosts && (
-          <div className="flex flex-wrap justify-center gap-8 p-4">
+          <div className="grid grid-cols-4 gap-8 p-4 pr-8 pl-8">
             {profileUser.kitImages?.map((item, index) => (
-              <div key={index} className="p-2 border-2 rounded">
+              <div key={index} className="p-2 border-5 rounded-2xl bg-gray-400 w75">
                 <img
                   src={item.imageUrl}
                   alt={item.kitName}
-                  className="w-64 rounded"
+                  className="w-full rounded mx-auto"
                 />
 
-                <div className="text-center mt-2">{item.kitName}</div>
+                <div className="text-center mt-2 text-2xl">{item.kitName}</div>
               </div>
             ))}
           </div>

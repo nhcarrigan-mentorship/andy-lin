@@ -143,7 +143,7 @@ export default function Profile() {
         Profile
       </h1>
 
-    {/*user pfp*/}
+      {/*user pfp*/}
       <img
         src={profileUser.pfpLink || "/default-pfp.png"}
         alt="Profile"
@@ -165,7 +165,7 @@ export default function Profile() {
         Social
       </button>
 
-    {/*user posts*/}
+      {/*user posts*/}
       <div id="profile_posts" className="pt-8 w-full">
         <h1
           className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
@@ -173,17 +173,22 @@ export default function Profile() {
         >
           Posts
         </h1>
-        
+
         <div className="flex flex-wrap justify-center gap-8 p-4">
-          {profileUser.uploadedImages?.map((item, index) => (
+          {profileUser.kitImages?.map((item, index) => (
             <div key={index} className="p-2 border-2 rounded">
-              <img src={item.image} alt={item.name} />
-              <div className="text-center">{item.name}</div>
+              <img
+                src={item.imageUrl}
+                alt={item.kitName}
+                className="w-64 rounded"
+              />
+
+              <div className="text-center mt-2">{item.kitName}</div>
             </div>
           ))}
         </div>
 
-      {/*user collection*/}
+        {/*user collection*/}
         <div id="profile_collection" className="pt-6 w-full">
           <h1
             className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"

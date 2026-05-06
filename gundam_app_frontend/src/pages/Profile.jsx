@@ -174,19 +174,21 @@ export default function Profile() {
           Posts
         </h1>
 
-        <div className="flex flex-wrap justify-center gap-8 p-4">
-          {profileUser.kitImages?.map((item, index) => (
-            <div key={index} className="p-2 border-2 rounded">
-              <img
-                src={item.imageUrl}
-                alt={item.kitName}
-                className="w-64 rounded"
-              />
+        {showPosts && (
+          <div className="flex flex-wrap justify-center gap-8 p-4">
+            {profileUser.kitImages?.map((item, index) => (
+              <div key={index} className="p-2 border-2 rounded">
+                <img
+                  src={item.imageUrl}
+                  alt={item.kitName}
+                  className="w-64 rounded"
+                />
 
-              <div className="text-center mt-2">{item.kitName}</div>
-            </div>
-          ))}
-        </div>
+                <div className="text-center mt-2">{item.kitName}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/*user collection*/}
         <div id="profile_collection" className="pt-6 w-full">

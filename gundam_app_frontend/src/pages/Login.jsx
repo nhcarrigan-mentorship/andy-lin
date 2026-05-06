@@ -19,6 +19,7 @@ function Login() {
     });
   };
 
+  //login submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,7 +87,7 @@ function Login() {
     }    
 
     try {
-      const res = await fetch("http://localhost:5000/post", {
+      const res = await fetch("http://localhost:5000/users/post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

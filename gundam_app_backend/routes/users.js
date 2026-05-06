@@ -130,4 +130,27 @@ router.put("/update-pfp", auth, async (req, res) => {
   }
 });
 
+router.post("/post", auth, async (req, res) => {
+  try {
+    const { kitName, kitImageLink } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    user.kitImages.push({
+      kitName,
+      imageUrl: kitImageLink,
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      message: "Post created successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
+
 module.exports = router;

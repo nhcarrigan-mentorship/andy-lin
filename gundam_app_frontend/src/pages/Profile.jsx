@@ -46,7 +46,7 @@ export default function Profile() {
         kitsData = kitsDataJson;
       } else {
         if (!token) {
-          throw new Error("No token found");
+          throw new Error("Login to view your profile");
         }
 
         const [userRes, kitsRes] = await Promise.all([
@@ -93,22 +93,43 @@ export default function Profile() {
   }, [username]);
 
   if (status === "loading") {
-    return <div className="p-4 text-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[400px]">
+          <h1 className="text-3xl font-serif mb-4">Loading...</h1>
+          <p className="text-lg">Fetching profile data</p>
+        </div>
+      </div>
+    );
   }
 
   if (status === "error") {
     return (
-      <div className="p-4 text-center">
-        <p>{errorMessage}</p>
-        <button className="mt-4 underline text-blue-600" onClick={loadData}>
-          Retry
-        </button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[450px] border">
+
+          <p className="text-3xl">{errorMessage}</p>
+
+          <button
+            onClick={loadData}
+            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border-3 text-xl"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!profileUser) {
-    return <div className="p-4 text-center">User not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[400px]">
+          <h1 className="text-3xl font-serif mb-4">User Not Found</h1>
+          <p className="text-lg">This profile does not exist.</p>
+        </div>
+      </div>
+    );
   }
 
   const completedCount = userKits.filter(

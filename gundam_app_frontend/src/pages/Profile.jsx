@@ -105,9 +105,8 @@ export default function Profile() {
 
   if (status === "error") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[450px] border">
-
           <p className="text-3xl">{errorMessage}</p>
 
           <button
@@ -115,6 +114,17 @@ export default function Profile() {
             className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border text-xl"
           >
             Retry
+          </button>
+        </div>
+
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[450px] border mt-10">
+          <p className="text-3xl">Search for Users</p>
+
+          <button
+            onClick={() => navigate("/social")}
+            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border text-xl"
+          >
+            Social
           </button>
         </div>
       </div>

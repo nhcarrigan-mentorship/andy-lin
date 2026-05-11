@@ -16,66 +16,66 @@ export default function Profile() {
   const [query, setQuery] = useState("");
   const [showCollection, setShowCollection] = useState(true);
   const [showPosts, setShowPosts] = useState(true);
-
+  
   const loadData = async () => {
-    const token = localStorage.getItem("token");
-    setStatus("loading");
+  const token = localStorage.getItem("token");
+  setStatus("loading");
 
-    try {
-      let userData;
-      let kitsData = [];
+  try {
+    let userData;
+    let kitsData = [];
 
-      if (username) {
-        const [userRes, kitsRes] = await Promise.all([
-          fetch(`http://localhost:5000/users/${username}`),
-          fetch(`http://localhost:5000/api/userkits/${username}`),
-        ]);
+    if (username) {
+      const [userRes, kitsRes] = await Promise.all([
+        fetch(`http://localhost:5000/users/${username}`),
+        fetch(`http://localhost:5000/api/userkits/${username}`),
+      ]);
 
-        const userDataJson = await userRes.json();
-        const kitsDataJson = await kitsRes.json();
+      const userDataJson = await userRes.json();
+      const kitsDataJson = await kitsRes.json();
 
-        if (!userRes.ok) {
-          throw new Error(userDataJson.message || "User not found");
-        }
-
-        if (!kitsRes.ok) {
-          throw new Error(kitsDataJson.message || "Failed to fetch user kits");
-        }
-
-        userData = userDataJson;
-        kitsData = kitsDataJson;
-      } else {
-        if (!token) {
-          throw new Error("Login to view your profile");
-        }
-
-        const [userRes, kitsRes] = await Promise.all([
-          fetch("http://localhost:5000/users/me", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch("http://localhost:5000/api/userkits", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-        ]);
-
-        const userDataJson = await userRes.json();
-        const kitsDataJson = await kitsRes.json();
-
-        if (!userRes.ok) {
-          throw new Error("Failed to fetch user");
-        }
-
-        if (!kitsRes.ok) {
-          throw new Error("Failed to fetch kits");
-        }
-
-        userData = userDataJson;
-        kitsData = kitsDataJson;
+      if (!userRes.ok) {
+        throw new Error(userDataJson.message || "User not found");
       }
+
+      if (!kitsRes.ok) {
+        throw new Error(kitsDataJson.message || "Failed to fetch user kits");
+      }
+
+      userData = userDataJson;
+      kitsData = kitsDataJson;
+    } else {
+      if (!token) {
+        throw new Error("Login to view your profile");
+      }
+
+      const [userRes, kitsRes] = await Promise.all([
+        fetch("http://localhost:5000/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5000/api/userkits", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      const userDataJson = await userRes.json();
+      const kitsDataJson = await kitsRes.json();
+
+      if (!userRes.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      if (!kitsRes.ok) {
+        throw new Error("Failed to fetch kits");
+      }
+
+      userData = userDataJson;
+      kitsData = kitsDataJson;
+    }
 
       setProfileUser(userData);
       setUserKits(kitsData);
@@ -168,6 +168,8 @@ export default function Profile() {
         </li>
       ));
 
+  const isOwnProfile = !username;
+
   return (
     <div className="font-bold gap-2">
       <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">
@@ -196,6 +198,14 @@ export default function Profile() {
         Social
       </button>
 
+      {!isOwnProfile && (
+        <button
+          className="block mx-auto border-2 p-2 w-50 rounded-lg bg-blue-700 text-white hover:bg-blue-900 mt-2"
+        >
+          Follow
+        </button>
+      )}
+
       {/*user posts*/}
       <div id="profile_posts" className="pt-8 w-full">
         <h1
@@ -208,7 +218,10 @@ export default function Profile() {
         {showPosts && (
           <div className="grid grid-cols-4 gap-8 p-4 pr-8 pl-8">
             {profileUser.kitImages?.map((item, index) => (
-              <div key={index} className="p-2 border-5 rounded-2xl bg-gray-400 w75">
+              <div
+                key={index}
+                className="p-2 border-5 rounded-2xl bg-gray-400 w75"
+              >
                 <img
                   src={item.imageUrl}
                   alt={item.kitName}

@@ -112,7 +112,7 @@ export default function Profile() {
 
           <button
             onClick={loadData}
-            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border-3 text-xl"
+            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border text-xl"
           >
             Retry
           </button>

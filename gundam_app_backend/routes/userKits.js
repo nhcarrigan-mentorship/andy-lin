@@ -77,7 +77,10 @@ router.delete("/:kitId", auth, async (req, res) => {
 router.get("/:username", async (req, res) => {
   try {
     const user = await User.findOne({
-      username: req.params.username,
+      username: {
+        $regex: `^${req.params.username}$`,
+        $options: "i",
+      },
     }).select("username pfpLink uploadedImages");
 
     if (!user) {

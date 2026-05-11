@@ -90,9 +90,16 @@ router.get("/me", auth, async (req, res) => {
 
 router.get("/:username", async (req, res) => {
   try {
+    //console.log("Searching for:", req.params.username);
+
     const user = await User.findOne({
-      username: req.params.username,
+      username: {
+        $regex: `^${req.params.username}$`,
+        $options: "i",
+      },
     }).select("-password -email");
+
+    //console.log("Found user:", user)
 
     if (!user) {
       return res.status(404).json({

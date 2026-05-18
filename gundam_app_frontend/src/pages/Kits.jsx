@@ -193,23 +193,23 @@ useEffect(() => {
                   </label>
                 ))}
               </div>
-
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {paginatedCards
             .filter((card) => card._id)
             .map((card) => (
               <Link to={`/kits/${card._id}`} key={card._id}>
-                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 h-135 group">
+                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 group overflow-hidden">
                   <img
                     src={card.imageUrl}
-                    className="w-[95%] mx-auto pt-2 transition duration-300 group-hover:brightness-50 rounded-xl"
                     alt={card.name}
+                    className="w-full aspect-square object-cover transition duration-300 group-hover:brightness-50"
                   />
-                  <h2 className="text-center mt-auto pb-6">{card.name}</h2>
+
+                  <h2 className="text-center p-4">{card.name}</h2>
                 </div>
               </Link>
             ))}

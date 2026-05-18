@@ -16,6 +16,8 @@ export default function Profile() {
   const [query, setQuery] = useState("");
   const [showCollection, setShowCollection] = useState(true);
   const [showPosts, setShowPosts] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   
   const loadData = async () => {
   const token = localStorage.getItem("token");
@@ -79,6 +81,15 @@ export default function Profile() {
 
       setProfileUser(userData);
       setUserKits(kitsData);
+
+      const loggedInUserId = localStorage.getItem("userId");
+
+      if (username && userData.followers?.includes(loggedInUserId)) {
+        setIsFollowing(true);
+      } else {
+        setIsFollowing(false);
+      }
+
       setStatus("success");
     } catch (err) {
       setErrorMessage(err.message);
@@ -170,6 +181,41 @@ export default function Profile() {
 
   const isOwnProfile = !username;
 
+  const handleFollowToggle = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setFollowLoading(true);
+
+      const res = await fetch(
+        `http://localhost:5000/users/${profileUser._id}/follow`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to follow user");
+      }
+
+      setIsFollowing(data.following);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   return (
     <div className="font-bold gap-2">
       <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">
@@ -200,9 +246,11 @@ export default function Profile() {
 
       {!isOwnProfile && (
         <button
+          onClick={handleFollowToggle}
+          disabled={followLoading}
           className="block mx-auto border-2 p-2 w-50 rounded-lg bg-blue-700 text-white hover:bg-blue-900 mt-2"
         >
-          Follow
+          {followLoading ? "Loading..." : isFollowing ? "Unfollow" : "Follow"}
         </button>
       )}
 

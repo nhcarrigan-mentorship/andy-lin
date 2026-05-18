@@ -20,36 +20,44 @@ function Login() {
   };
 
   //login submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const res = await fetch("http://localhost:5000/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        setMessage("Logged in successfully");
-      } else {
-        setMessage(data.message);
-      }
-    } catch (err) {
-      setMessage("Server error");
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("username", data.username);
+
+      setMessage("Logged in successfully");
+
+      window.location.reload();
+    } else {
+      setMessage(data.message);
     }
-  };
+  } catch (err) {
+    setMessage("Server error");
+  }
+};
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setMessage("Logged out");
-    window.location.reload(); 
-  };
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("username");
+
+  setMessage("Logged out");
+  window.location.reload();
+};
 
   const handlePfpSubmit = async (e) => {
     e.preventDefault();

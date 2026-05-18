@@ -169,4 +169,61 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/:id/follow", auth, async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+    const targetUserId = req.params.id;
+
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({
+        message: "You cannot follow yourself",
+      });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const alreadyFollowing = currentUser.following.some((id) =>
+      id.equals(targetUserId),
+    );
+
+    if (alreadyFollowing) {
+      currentUser.following.pull(targetUserId);
+      targetUser.followers.pull(currentUserId);
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.json({
+        message: "Unfollowed successfully",
+        following: false,
+      });
+    }
+
+    currentUser.following.push(targetUserId);
+    targetUser.followers.push(currentUserId);
+
+    await currentUser.save();
+    await targetUser.save();
+
+    return res.json({
+      message: "Followed successfully",
+      following: true,
+    });
+  } catch (err) {
+    console.error("FOLLOW ROUTE ERROR:", err);
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+});
+
+
 module.exports = router;

@@ -59,37 +59,41 @@ function Collection() {
    }
  };
 
- const filterKits = (status, isCompleted = false) =>
-   (Array.isArray(kits) ? kits : [])
-     .filter(
-       (userKit) =>
-         userKit.status === status &&
-         userKit.kit?.name?.toLowerCase().includes(query.toLowerCase()),
-     )
-     .map((userKit) => (
-       <li
-         key={userKit._id}
-         className="flex items-center justify-between gap-4 hover:text-blue-900"
-       >
-         <Link
-           to={`/kits/${userKit.kit._id}`}
-           className="hover:underline text-xl"
-         >
-           {userKit.kit?.name}
-         </Link>
+  const filterKits = (status, isCompleted = false) =>
+    (Array.isArray(kits) ? kits : [])
+      .filter(
+        (userKit) =>
+          userKit.status === status &&
+          userKit.kit?.name?.toLowerCase().includes(query.toLowerCase()),
+      )
+      .sort((a, b) => {
+        if (!a.buildDate) return 1;
+        if (!b.buildDate) return -1;
+        return new Date(a.buildDate) - new Date(b.buildDate);
+      })
+      .map((userKit) => (
+        <li className="flex items-center justify-between hover:text-blue-900">
+          <Link
+            to={`/kits/${userKit.kit._id}`}
+            className="hover:underline text-xl"
+          >
+            {userKit.kit?.name}
+          </Link>
 
-         {isCompleted && (
-           <input
-             type="date"
-             value={userKit.buildDate ? userKit.buildDate.slice(0, 10) : ""}
-             onChange={(e) =>
-               handleBuildDateChange(userKit._id, e.target.value)
-             }
-             className="border bg-gray-300 rounded px-2 py-1"
-           />
-         )}
-       </li>
-     ));
+          {isCompleted && (
+            <div className="pr-7">
+              <input
+                type="date"
+                value={userKit.buildDate ? userKit.buildDate.slice(0, 10) : ""}
+                onChange={(e) =>
+                  handleBuildDateChange(userKit._id, e.target.value)
+                }
+                className="border bg-gray-300 rounded px-2 py-1 text-sm w-36 text-right"
+              />
+            </div>
+          )}
+        </li>
+      ));
 
   return (
     <div className="font-bold gap-2">
@@ -116,7 +120,7 @@ function Collection() {
 
         {showCompleted && (
           <div className="pl-8 bg-gray-500">
-            <ul className="list-disc pl-8 text-2xl space-y-2">
+            <ul className="list-disc pl-8 text-2xl space-y-1">
               {filterKits("completed", true)}
             </ul>
           </div>

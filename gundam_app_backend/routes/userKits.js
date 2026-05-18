@@ -98,4 +98,30 @@ router.get("/:username", async (req, res) => {
   }
 });
 
+router.patch("/:id", auth, async (req, res) => {
+  try {
+    const { buildDate, status } = req.body;
+
+    const userKit = await UserKit.findById(req.params.id);
+
+    if (!userKit) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    if (buildDate !== undefined) {
+      userKit.buildDate = buildDate || null;
+    }
+
+    if (status) {
+      userKit.status = status;
+    }
+
+    await userKit.save();
+
+    res.json(userKit);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

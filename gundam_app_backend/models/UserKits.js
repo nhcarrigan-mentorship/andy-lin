@@ -1,28 +1,33 @@
 const mongoose = require("mongoose");
 
 const userKitSchema = new mongoose.Schema(
-    {
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-
-        kit: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Gundam",
-            required: true
-        },
-
-        status: {
-            type: String,
-            enum: ["wishlist", "backlog", "completed"],
-            required: true
-        },
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    {
-        timestamps: true
-    }
+
+    kit: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Gundam",
+      required: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["wishlist", "backlog", "completed"],
+      required: true,
+    },
+    
+    buildDate: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 
 userKitSchema.index({ user: 1, kit: 1});

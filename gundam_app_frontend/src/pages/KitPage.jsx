@@ -194,7 +194,7 @@ async function submitRating(value) {
         <p>Kit Number: {kit.kitNumber}</p>
       </div>
 
-    // Add to Collection buttons
+    {/* Add to Collection buttons */}
       <div className="my-auto column p-2 flex flex-col mr-40">
         <button
           onClick={() => addToCollection(kit._id, "wishlist")}
@@ -227,7 +227,7 @@ async function submitRating(value) {
         {message && <p className="mt-3 text-white text-l">{message}</p>}
       </div>
 
-    // Nav Buttons
+    {/* Nav Buttons */}
       <div className="w-52/100 pr-4 gap-4 mt-4">
         <button
           onClick={() => navigate("/")}
@@ -243,7 +243,7 @@ async function submitRating(value) {
           Go to Collection
         </button>
 
-    // Ratings and Instructions
+    {/* Ratings and Instructions */}
         <div className="border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center sm:h-[60vh]">
           <div className="mb-20 w-full flex flex-col items-center text-center">
             <h2 className="text-2xl font-bold mb-1">Rating:</h2>

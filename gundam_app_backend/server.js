@@ -11,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/users", userRoutes)
 app.use("/api/userkits", userKitRoutes)
+app.use("/api/ratings", require("./routes/ratings"));
 
 app.get("/", (req, res) => {
   res.send("Hello World");

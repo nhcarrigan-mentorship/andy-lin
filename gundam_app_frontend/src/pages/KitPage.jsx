@@ -7,6 +7,8 @@ export default function KitPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [message, setMessage] = useState("");
+  const [userRating, setUserRating] = useState(null);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -15,7 +17,6 @@ export default function KitPage() {
 
     const fetchKit = async () => {
       try {
-        // console.log("Fetching kit with ID:", kitId);
         const response = await fetch(`http://localhost:5000/kits/${kitId}`);
         if (!response.ok) throw new Error("Kit not found");
         const data = await response.json();
@@ -28,6 +29,35 @@ export default function KitPage() {
     };
 
     fetchKit();
+  }, [kitId]);
+
+  useEffect(() => {
+    if (!kitId) return;
+
+    const fetchUserRating = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch(
+          `http://localhost:5000/api/ratings/${kitId}/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setUserRating(data.value ?? null);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchUserRating();
   }, [kitId]);
 
   if (loading) return <div className="p-4">Loading kit info...</div>;
@@ -108,8 +138,48 @@ async function removeFromCollection(kitId) {
   }
 }
 
+async function submitRating(value) {
+  try {
+    setRatingLoading(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("You must be logged in.");
+      return;
+    }
+
+    const res = await fetch(`http://localhost:5000/api/ratings/${kit._id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ value }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Rating failed");
+
+    setKit((prev) => ({
+      ...prev,
+      averageRating: data.averageRating,
+      ratingsCount: data.ratingsCount,
+    }));
+
+    setUserRating(value);
+  } catch (err) {
+    setMessage(err.message);
+  } finally {
+    setRatingLoading(false);
+  }
+}
+
+
   return (
     <div className="font-bold flex p-4">
+
+    // Kit Info
       <div className="w-1/2 mx-auto">
         <h1 className="text-3xl font-bold">{kit.name}</h1>
         <p className="text-gray-900 mb-4">
@@ -118,12 +188,13 @@ async function removeFromCollection(kitId) {
         <img
           src={kit.imageUrl}
           alt={kit.name}
-          className="h-[50vh] w-auto object-contain"
+          className="h-[70vh] w-auto object-contain"
         />
         <p className="mt-4">Release Year: {kit.releaseYear}</p>
         <p>Kit Number: {kit.kitNumber}</p>
       </div>
 
+    // Add to Collection buttons
       <div className="my-auto column p-2 flex flex-col mr-40">
         <button
           onClick={() => addToCollection(kit._id, "wishlist")}
@@ -156,6 +227,7 @@ async function removeFromCollection(kitId) {
         {message && <p className="mt-3 text-white text-l">{message}</p>}
       </div>
 
+    // Nav Buttons
       <div className="w-52/100 pr-4 gap-4 mt-4">
         <button
           onClick={() => navigate("/")}
@@ -171,11 +243,41 @@ async function removeFromCollection(kitId) {
           Go to Collection
         </button>
 
+    // Ratings and Instructions
         <div className="border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center sm:h-[60vh]">
-          <div className="mb-20">
+          <div className="mb-20 w-full flex flex-col items-center text-center">
             <h2 className="text-2xl font-bold mb-1">Rating:</h2>
-            <p>{kit.kitRating ?? "No rating yet"}</p>
+
+            <p className="mb-2 text-center">
+              {kit.averageRating?.toFixed(1) ?? "0.0"} / 5 (
+              {kit.ratingsCount ?? 0})
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-3">Your Rating:</h2>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button
+                  key={num}
+                  disabled={ratingLoading}
+                  onClick={() => submitRating(num)}
+                  className={`border px-3 py-1 rounded-2xl hover:bg-yellow-900 ${
+                    userRating === num ? "bg-yellow-400" : ""
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+
+              <button
+                disabled={ratingLoading}
+                onClick={() => submitRating(null)}
+                className="border p-2 rounded bg-red-800 text-white rounded-xl hover:bg-red-900 ml-5"
+              >
+                Remove Rating
+              </button>
+            </div>
           </div>
+
           <div>
             <h2 className="text-2xl font-bold mb-1">Instructions:</h2>
             {kit.instructionsUrl ? (

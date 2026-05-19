@@ -156,15 +156,22 @@ async function removeFromCollection(kitId) {
         {message && <p className="mt-3 text-white text-l">{message}</p>}
       </div>
 
-      <div className="w-1/2">
+      <div className="w-52/100 pr-4 gap-4 mt-4">
         <button
           onClick={() => navigate("/")}
-          className="border border-2 rounded-xl bg-green-800 text-white p-2 w-50 hover:bg-green-900 mb-10 mt-4 absolute right-4"
+          className="border border-2 rounded-xl bg-green-800 text-white p-2 w-50 hover:bg-green-900 mb-10 mt-4"
         >
-          Back to Kits
+          Go to Kits
         </button>
 
-        <div className="border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center mt-20">
+        <button
+          onClick={() => navigate("/Collection")}
+          className="border border-2 rounded-xl bg-green-800 text-white p-2 w-50 hover:bg-green-900 mb-10 mt-4 ml-10"
+        >
+          Go to Collection
+        </button>
+
+        <div className="border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center sm:h-[60vh]">
           <div className="mb-20">
             <h2 className="text-2xl font-bold mb-1">Rating:</h2>
             <p>{kit.kitRating ?? "No rating yet"}</p>

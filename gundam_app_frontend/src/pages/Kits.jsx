@@ -11,6 +11,7 @@ function Kits() {
   const pageSize = 20;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageInput, setPageInput] = useState("1");
 
 useEffect(() => {
   const fetchKits = async () => {
@@ -92,12 +93,17 @@ useEffect(() => {
     setCurrentPage(1);
   }, [query, selectedGrades, selectedSeries])
 
+
   const totalPages = Math.ceil(filteredCards.length / pageSize);
 
   const paginatedCards = filteredCards.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  useEffect(() => {
+    setPageInput(currentPage.toString());
+  }, [currentPage]);
 
   if (loading) {
     return (
@@ -219,13 +225,48 @@ useEffect(() => {
           <span className="text-xl block pb-2">
             Page {currentPage} of {totalPages}
           </span>
+
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="bg-gray-400 p-1 rounded-xl disabled:opacity-40 hover:brightness-50 border-3 mr-8"
+            className="bg-gray-400 p-1 rounded-xl disabled:opacity-40 hover:brightness-50 border-3 mr-1"
           >
             Prev
           </button>
+
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={pageInput}
+            onChange={(e) => {
+              setPageInput(e.target.value);
+            }}
+            onBlur={() => {
+              const page = Number(pageInput);
+
+              if (page >= 1 && page <= totalPages) {
+                setCurrentPage(page);
+              } else {
+                setPageInput(currentPage.toString());
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+
+                const page = Number(pageInput);
+
+                if (page >= 1 && page <= totalPages) {
+                  setCurrentPage(page);
+                } else {
+                  setPageInput(currentPage.toString());
+                }
+              }
+            }}
+            className="w-12 p-1 border-3 rounded-xl bg-gray-300 mb-3 mr-1"
+          />
+
           <button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function KitPage() {
@@ -8,8 +8,9 @@ export default function KitPage() {
   const [error, setError] = useState(false);
   const [message, setMessage] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // console.log("Kit ID:", kitId);
     if (!kitId) return;
 
     const fetchKit = async () => {
@@ -34,10 +35,6 @@ export default function KitPage() {
 
 async function addToCollection(kitId, status) {
   try {
-    // console.log("=== ADD TO COLLECTION START ===");
-    // console.log("Kit ID:", kitId);
-    // console.log("Status:", status);
-
     const token = localStorage.getItem("token");
     
     if (!token) {
@@ -75,7 +72,6 @@ async function addToCollection(kitId, status) {
 
     setMessage("Kit Added Successfully");
 
-    // console.log("=== ADD TO COLLECTION SUCCESS ===");
   } catch (err) {
     console.error("ADD TO COLLECTION ERROR");
     console.error(err);
@@ -128,7 +124,7 @@ async function removeFromCollection(kitId) {
         <p>Kit Number: {kit.kitNumber}</p>
       </div>
 
-      <div className="my-auto column p-2 flex flex-col mr-20">
+      <div className="my-auto column p-2 flex flex-col mr-40">
         <button
           onClick={() => addToCollection(kit._id, "wishlist")}
           className="border border-2 rounded-xl bg-blue-800 text-white p-2 w-50 hover:bg-blue-900 mb-3"
@@ -160,25 +156,34 @@ async function removeFromCollection(kitId) {
         {message && <p className="mt-3 text-white text-l">{message}</p>}
       </div>
 
-      <div className="w-1/2 border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center">
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold mb-1">Rating:</h2>
-          <p>{kit.kitRating ?? "No rating yet"}</p>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold mb-1">Instructions:</h2>
-          {kit.instructionsUrl ? (
-            <a
-              href={kit.instructionsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            >
-              View Instructions
-            </a>
-          ) : (
-            <p>No instructions available.</p>
-          )}
+      <div className="w-1/2">
+        <button
+          onClick={() => navigate("/")}
+          className="border border-2 rounded-xl bg-green-800 text-white p-2 w-50 hover:bg-green-900 mb-10 mt-4 absolute right-4"
+        >
+          Back to Kits
+        </button>
+
+        <div className="border border-3 rounded-lg h-[80vh] flex flex-col justify-center items-center mt-20">
+          <div className="mb-20">
+            <h2 className="text-2xl font-bold mb-1">Rating:</h2>
+            <p>{kit.kitRating ?? "No rating yet"}</p>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold mb-1">Instructions:</h2>
+            {kit.instructionsUrl ? (
+              <a
+                href={kit.instructionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                View Instructions
+              </a>
+            ) : (
+              <p>No instructions available.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

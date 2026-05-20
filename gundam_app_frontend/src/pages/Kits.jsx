@@ -264,7 +264,7 @@ useEffect(() => {
                 }
               }
             }}
-            className="w-12 p-1 border-3 rounded-xl bg-gray-300 mb-3 mr-1"
+            className="w-14 p-1 border-3 rounded-xl bg-gray-300 mb-3 mr-1"
           />
 
           <button

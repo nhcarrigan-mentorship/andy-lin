@@ -179,7 +179,7 @@ async function submitRating(value) {
   return (
     <div className="font-bold flex p-4">
 
-    // Kit Info
+    {/* Kit Info */}
       <div className="w-1/2 mx-auto">
         <h1 className="text-3xl font-bold">{kit.name}</h1>
         <p className="text-gray-900 mb-4">

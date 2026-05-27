@@ -7,6 +7,10 @@ function Login() {
     password: "",
   });
 
+  const [message, setMessage] = useState("");
+
+  const token = localStorage.getItem("token");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({
@@ -15,29 +19,171 @@ function Login() {
     });
   };
 
-  const [message, setMessage] = useState("")
+  //login submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
+  try {
+    const res = await fetch("http://localhost:5000/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("username", data.username);
+
+      setMessage("Logged in successfully");
+
+      window.location.reload();
+    } else {
+      setMessage(data.message);
+    }
+  } catch (err) {
+    setMessage("Server error");
+  }
+};
+
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("username");
+
+  setMessage("Logged out");
+  window.location.reload();
+};
+
+  const handlePfpSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/users/login", {
-        method: "POST",
+      const res = await fetch("http://localhost:5000/users/update-pfp", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          pfpLink: form.pfpLink,
+        }),
       });
 
       const data = await res.json();
 
-      setMessage(data.message);
+      if (res.ok) {
+        setMessage("Profile picture updated");
+      } else {
+        setMessage(data.message);
+      }
     } catch (err) {
       setMessage("Server error");
     }
   };
 
+  const handleKitSubmit = async (e) => {
+    e.preventDefault();
 
+    if (!form.kitName || !form.kitImageLink) {
+      setMessage("Both kit name and image link are required");
+      return;
+    }    
+
+    try {
+      const res = await fetch("http://localhost:5000/users/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          kitName: form.kitName,
+          kitImageLink: form.kitImageLink,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage("Post made successfully");
+        setForm((prev) => ({
+          ...prev,
+          kitName: "",
+          kitImageLink: "",
+        }));
+      } else {
+        setMessage(data.message || "Failed to make post");
+      }
+    } catch (err) {
+      setMessage("Server error");
+    }
+  };
+
+  //logout 
+  if (token) {
+    return (
+      <div className="font-bold text-center mt-50">
+        {/*pfp image*/}
+        <h1 className="text-4xl font-serif mt-6">Profile Pic Link</h1>
+        <form onSubmit={handlePfpSubmit}>
+          <input
+            type="text"
+            name="pfpLink"
+            value={form.pfpLink || ""}
+            onChange={handleChange}
+            placeholder="Profile Pic Link"
+            className="block mx-auto mt-5 w-[20%] border-3 bg-gray-300 rounded-xl p-2"
+          />
+        </form>
+
+        {/*post kit pic*/}
+        <h1 className="text-4xl font-serif mt-20">Create New Post</h1>
+        <form onSubmit={handleKitSubmit}>
+          <input
+            type="text"
+            name="kitImageLink"
+            value={form.kitImageLink || ""}
+            onChange={handleChange}
+            placeholder="Kit Image Link"
+            className="block mx-auto mt-5 w-[20%] border-3 bg-gray-300 rounded-xl p-2"
+          />
+          <input
+            type="text"
+            name="kitName"
+            value={form.kitName || ""}
+            onChange={handleChange}
+            placeholder="Kit Name"
+            className="block mx-auto mt-5 w-[20%] border-3 bg-gray-300 rounded-xl p-2"
+          />
+
+          <button
+            className="bg-blue-800 border text-white rounded-xl p-2 hover:bg-blue-900 w-96 mt-5"
+            type="submit"
+          >
+            Post Kit
+          </button>
+        </form>
+
+        {message && (
+          <p className="mt-10 text-xl text-blue-500 font-semibold">{message}</p>
+        )}
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-800 border text-white rounded-xl p-2 hover:bg-red-900 w-96 mt-25"
+        >
+          Log Out
+        </button>
+      </div>
+    );
+  }
+
+  //usual login
   return (
     <div className="font-bold">
       <h1 className="text-center text-4xl p-4 font-serif pb-8">Log In</h1>
@@ -78,10 +224,11 @@ function Login() {
 
           <button
             type="submit"
-            className="bg-blue-700 border text-white rounded-xl p-2 hover:bg-blue-900 w-96"
+            className="bg-blue-800 border text-white rounded-xl p-2 hover:bg-blue-900 w-96"
           >
             Log In
           </button>
+
           <h1>Make an account?</h1>
           <Link
             to="/signup"

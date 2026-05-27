@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const gunplaKit = require("./models/Kits");
-const userRoutes = require("./routes/users")
+const userRoutes = require("./routes/users");
+const userKitRoutes = require("./routes/userKits");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -9,17 +10,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/users", userRoutes)
+app.use("/api/userkits", userKitRoutes)
+app.use("/api/ratings", require("./routes/ratings"));
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
 app.post("/kits", async (req, res) => {
-  console.log("Received data:", req.body);
+  // console.log("Received data:", req.body);
   try {
     const newKit = new gunplaKit(req.body);
     await newKit.save();
-    console.log("Saved to DB:", newKit);
+    // console.log("Saved to DB:", newKit);
     res.status(201).json(newKit);
   } catch (error) {
     console.error("Error saving kit:", error);

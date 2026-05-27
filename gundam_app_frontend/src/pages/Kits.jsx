@@ -9,19 +9,39 @@ function Kits() {
   const [selectedSeries, setSelectedSeries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pageInput, setPageInput] = useState("1");
 
-  useEffect(() => {
-    const fetchKits = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/kits");
-        const data = await response.json();
-        setKits(data);
-      } catch (error) {
-        console.error(error);
+useEffect(() => {
+  const fetchKits = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("http://localhost:5000/kits");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch kits");
       }
-    };
-    fetchKits();
-  }, []);
+
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        throw new Error("No kits found");
+      }
+
+      setKits(data);
+    } catch (error) {
+      console.error(error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchKits();
+}, []);
 
   const handleChange = (e) => setQuery(e.target.value);
 
@@ -73,6 +93,7 @@ function Kits() {
     setCurrentPage(1);
   }, [query, selectedGrades, selectedSeries])
 
+
   const totalPages = Math.ceil(filteredCards.length / pageSize);
 
   const paginatedCards = filteredCards.slice(
@@ -80,12 +101,32 @@ function Kits() {
     currentPage * pageSize
   );
 
+  useEffect(() => {
+    setPageInput(currentPage.toString());
+  }, [currentPage]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="text-2xl font-bold animate-pulse">Loading Kits...</div>
+        <div className="mt-4 w-12 h-12 border-4 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-3xl font-bold">{error}</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="font-bold">
       <h1 className="text-center text-4xl p-4 font-serif pb-8">Kits</h1>
 
-      {/* Query */}
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <input
           type="text"
           value={query}
@@ -95,7 +136,6 @@ function Kits() {
         />
       </form>
 
-      {/* Filter */}
       <div id="content" className="flex pt-6">
         <div className="pl-4 mr-3">
           <button
@@ -163,36 +203,70 @@ function Kits() {
           )}
         </div>
 
-        {/* Kit Boxes */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {paginatedCards
             .filter((card) => card._id)
             .map((card) => (
               <Link to={`/kits/${card._id}`} key={card._id}>
-                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 h-135 group">
+                <div className="bg-gray-400 border-3 rounded-xl flex flex-col hover:bg-gray-800 text-xl transition duration-300 group overflow-hidden">
                   <img
                     src={card.imageUrl}
-                    className="w-[95%] mx-auto pt-2 transition duration-300 group-hover:brightness-50 rounded-xl"
                     alt={card.name}
+                    className="w-full aspect-square object-cover transition duration-300 group-hover:brightness-50"
                   />
-                  <h2 className="text-center mt-auto pb-6">{card.name}</h2>
+
+                  <h2 className="text-center p-4">{card.name}</h2>
                 </div>
               </Link>
             ))}
         </div>
 
-        {/* Pages */}
         <div className="justify-center mr-4 w-auto whitespace-nowrap pr-4 ml-4">
           <span className="text-xl block pb-2">
             Page {currentPage} of {totalPages}
           </span>
+
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="bg-gray-400 p-1 rounded-xl disabled:opacity-40 hover:brightness-50 border-3 mr-8"
+            className="bg-gray-400 p-1 rounded-xl disabled:opacity-40 hover:brightness-50 border-3 mr-1"
           >
             Prev
           </button>
+
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={pageInput}
+            onChange={(e) => {
+              setPageInput(e.target.value);
+            }}
+            onBlur={() => {
+              const page = Number(pageInput);
+
+              if (page >= 1 && page <= totalPages) {
+                setCurrentPage(page);
+              } else {
+                setPageInput(currentPage.toString());
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+
+                const page = Number(pageInput);
+
+                if (page >= 1 && page <= totalPages) {
+                  setCurrentPage(page);
+                } else {
+                  setPageInput(currentPage.toString());
+                }
+              }
+            }}
+            className="w-14 p-1 border-3 rounded-xl bg-gray-300 mb-3 mr-1"
+          />
+
           <button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
@@ -201,8 +275,6 @@ function Kits() {
             Next
           </button>
         </div>
-        {/* End */}
-
       </div>
     </div>
   );

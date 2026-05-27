@@ -1,93 +1,361 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
-export default function Profile({ user, currentUser }) {
+export default function Profile() {
   const navigate = useNavigate();
+  const { username } = useParams();
 
-  if (!user) return <div className="p-4 text-center">User not found.</div>;
+  const [status, setStatus] = useState("loading");
+  const [profileUser, setProfileUser] = useState(null);
+  const [userKits, setUserKits] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const completedCount = user.kits.filter(
-    (kit) => kit.status === "completed"
+  const [showCompleted, setShowCompleted] = useState(true);
+  const [showBacklog, setShowBacklog] = useState(true);
+  const [showWishlist, setShowWishlist] = useState(true);
+  const [query, setQuery] = useState("");
+  const [showCollection, setShowCollection] = useState(true);
+  const [showPosts, setShowPosts] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  
+  const loadData = async () => {
+  const token = localStorage.getItem("token");
+  setStatus("loading");
+
+  try {
+    let userData;
+    let kitsData = [];
+
+    if (username) {
+      const [userRes, kitsRes] = await Promise.all([
+        fetch(`http://localhost:5000/users/${username}`),
+        fetch(`http://localhost:5000/api/userkits/${username}`),
+      ]);
+
+      const userDataJson = await userRes.json();
+      const kitsDataJson = await kitsRes.json();
+
+      if (!userRes.ok) {
+        throw new Error(userDataJson.message || "User not found");
+      }
+
+      if (!kitsRes.ok) {
+        throw new Error(kitsDataJson.message || "Failed to fetch user kits");
+      }
+
+      userData = userDataJson;
+      kitsData = kitsDataJson;
+    } else {
+      if (!token) {
+        throw new Error("Login to view your profile");
+      }
+
+      const [userRes, kitsRes] = await Promise.all([
+        fetch("http://localhost:5000/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5000/api/userkits", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      const userDataJson = await userRes.json();
+      const kitsDataJson = await kitsRes.json();
+
+      if (!userRes.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      if (!kitsRes.ok) {
+        throw new Error("Failed to fetch kits");
+      }
+
+      userData = userDataJson;
+      kitsData = kitsDataJson;
+    }
+
+      setProfileUser(userData);
+      setUserKits(kitsData);
+
+      const loggedInUserId = localStorage.getItem("userId");
+
+      if (username && userData.followers?.includes(loggedInUserId)) {
+        setIsFollowing(true);
+      } else {
+        setIsFollowing(false);
+      }
+
+      setStatus("success");
+    } catch (err) {
+      setErrorMessage(err.message);
+      setProfileUser(null);
+      setUserKits([]);
+      setStatus("error");
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [username]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[400px]">
+          <h1 className="text-3xl font-serif mb-4">Loading...</h1>
+          <p className="text-lg">Fetching profile data</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[450px] border">
+          <p className="text-3xl">{errorMessage}</p>
+
+          <button
+            onClick={loadData}
+            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border text-xl"
+          >
+            Retry
+          </button>
+        </div>
+
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[450px] border mt-10">
+          <p className="text-3xl">Search for Users</p>
+
+          <button
+            onClick={() => navigate("/social")}
+            className="mt-6 px-6 py-2 rounded-xl bg-blue-700 hover:bg-blue-900 transition border text-xl"
+          >
+            Social
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-gray-700 text-white p-8 rounded-2xl shadow-lg text-center w-[400px]">
+          <h1 className="text-3xl font-serif mb-4">User Not Found</h1>
+          <p className="text-lg">This profile does not exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const completedCount = userKits.filter(
+    (kit) => kit.status === "completed",
   ).length;
 
-  const backlogCount = user.kits.filter(
-    (kit) => kit.status === "backlog"
+  const backlogCount = userKits.filter(
+    (kit) => kit.status === "backlog",
   ).length;
 
-  const [following, setFollowing] = useState(false);
+  const filterKits = (status) =>
+    userKits
+      .filter(
+        (userKit) =>
+          userKit.status === status &&
+          userKit.kit?.name?.toLowerCase().includes(query.toLowerCase()),
+      )
+      .map((userKit) => (
+        <li key={userKit._id} className="hover:text-blue-900">
+          <Link
+            to={`/kits/${userKit.kit._id}`}
+            className="hover:underline"
+          >
+            {userKit.kit?.name}
+          </Link>
+        </li>
+      ));
 
-  const isCurrentUser = currentUser && user.id === currentUser.id;
+  const isOwnProfile = !username;
+
+  const handleFollowToggle = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setFollowLoading(true);
+
+      const res = await fetch(
+        `http://localhost:5000/users/${profileUser._id}/follow`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to follow user");
+      }
+
+      setIsFollowing(data.following);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   return (
     <div className="font-bold gap-2">
-      {!isCurrentUser && (
-        <button
-          className="hover:underline text-2xl pt-4 pb-4 pl-4 hover:text-blue-800"
-          onClick={() => navigate("/social")}
-        >
-          &larr; Back to Socials
-        </button>
-      )}
+      <h1 className="text-center text-4xl p-4 font-serif pb-8 tracking-wide">
+        Profile
+      </h1>
 
-      {isCurrentUser && (
-      <h1 className="text-center text-4xl p-4 font-serif pb-8">Profile</h1>
-      )}
-
+      {/*user pfp*/}
       <img
-        src={user.profilePic}
-        alt={`${user.username} Profile Pic`}
-        className="mx-auto rounded-full object-cover h-50 w-50 border-3 text-white"
+        src={profileUser.pfpLink || "/default-pfp.png"}
+        alt="Profile"
+        className="mx-auto rounded-full object-cover h-50 w-50 border-3"
       />
 
-      <h1 className="text-center pt-2 text-3xl">{user.username}</h1>
+      <h1 className="text-center pt-2 text-3xl">{profileUser.username}</h1>
 
-      <h2 className="text-center text-xl text-gray-900">
-        {completedCount} Kits Built
-      </h2>
+      <h2 className="text-center text-xl">{completedCount} Kits Built</h2>
 
-      <h2 className="text-center text-xl text-gray-900 pb-2">
+      <h2 className="text-center text-xl pb-2">
         {backlogCount} Kits Backloged
       </h2>
 
-      {isCurrentUser ? (
+      <button
+        className="block mx-auto border-2 p-2 w-50 rounded-lg bg-green-700 text-white hover:bg-green-900"
+        onClick={() => navigate("/social")}
+      >
+        Social
+      </button>
+
+      {!isOwnProfile && (
         <button
-          className="block mx-auto border-2 p-2 rounded-lg bg-green-600 hover:bg-green-700 w-40 text-white"
-          onClick={() => navigate("/social")}
+          onClick={handleFollowToggle}
+          disabled={followLoading}
+          className="block mx-auto border-2 p-2 w-50 rounded-lg bg-blue-700 text-white hover:bg-blue-900 mt-2"
         >
-          Social
-        </button>
-      ) : (
-        <button
-          className={`block mx-auto border-2 p-2 rounded-lg w-40 text-white ${
-            following
-              ? "bg-red-800 hover:bg-gray-800"
-              : "bg-blue-800 hover:bg-gray-700"
-          }`}
-          onClick={() => setFollowing(!following)}
-        >
-          {following ? "Unfollow" : "Follow"}
+          {followLoading ? "Loading..." : isFollowing ? "Unfollow" : "Follow"}
         </button>
       )}
 
-      <h1 className="text-center pt-6 text-xl">Uploaded photos</h1>
-      <p className="text-center text-sm italic pb-2">
-        *Pictures are not mine, just using for demo
-      </p>
+      {/*user posts*/}
+      <div id="profile_posts" className="pt-8 w-full">
+        <h1
+          className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+          onClick={() => setShowPosts(!showPosts)}
+        >
+          Posts
+        </h1>
 
-      <div className="flex flex-wrap justify-center gap-8 p-4">
-        {user.uploadedImages.map((item, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center border-2 p-2 rounded hover:shadow-lg transition w-[45%] sm:w-[30%] md:w-[20%] bg-gray-400"
-          >
-            <img
-              src={item.image}
-              alt={item.name}
-              className="w-full h-auto object-contain mb-2"
-            />
-            <span className="text-center text-xl">{item.name}</span>
+        {showPosts && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-4 px-8">
+            {profileUser.kitImages?.map((item, index) => (
+              <div
+                key={index}
+                className="border-4 rounded-2xl bg-gray-400 overflow-hidden"
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.kitName}
+                  className="w-full aspect-square object-cover"
+                />
+
+                <div className="text-center p-4 text-2xl">{item.kitName}</div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+
+        {/*user collection*/}
+        <div id="profile_collection" className="pt-6 w-full">
+          <h1
+            className="w-full text-center text-3xl font-serif underline cursor-pointer bg-gray-700 p-3 hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+            onClick={() => setShowCollection(!showCollection)}
+          >
+            Collection
+          </h1>
+
+          {showCollection && (
+            <>
+              <form className="pt-6">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="block mx-auto w-1/4 border-3 bg-gray-300 rounded-xl p-2"
+                />
+              </form>
+
+              <div id="completed" className="pb-4 pt-8">
+                <h1
+                  className="pl-4 text-3xl underline bg-blue-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowCompleted(!showCompleted)}
+                >
+                  Completed
+                </h1>
+
+                {showCompleted && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("completed")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div id="backlog" className="pb-4">
+                <h1
+                  className="pl-4 text-3xl underline bg-yellow-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowBacklog(!showBacklog)}
+                >
+                  Backlog
+                </h1>
+
+                {showBacklog && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("backlog")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div id="wishlist" className="pb-4">
+                <h1
+                  className="pl-4 text-3xl underline bg-red-800 font-serif hover:bg-gray-800 hover:text-blue-900 transition duration-100"
+                  onClick={() => setShowWishlist(!showWishlist)}
+                >
+                  Wishlist
+                </h1>
+
+                {showWishlist && (
+                  <div className="pl-8 bg-gray-500">
+                    <ul className="list-disc pl-8 text-2xl space-y-2">
+                      {filterKits("wishlist")}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

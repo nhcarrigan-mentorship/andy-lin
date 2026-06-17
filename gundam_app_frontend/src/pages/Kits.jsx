@@ -137,17 +137,17 @@ useEffect(() => {
       </form>
 
       <div id="content" className="flex pt-6">
-        <div className="pl-4 mr-3">
+        <div className="pl-4 mr-3 w-36 shrink-0">
           <button
             type="button"
-            className="text-xl bg-gray-400 border-3 rounded-xl p-2 hover:brightness-50 whitespace-nowrap"
+            className="text-xl bg-gray-400 border-3 rounded-xl p-5 hover:brightness-50 whitespace-nowrap"
             onClick={() => setShowFilter(!showFilter)}
           >
-            Filter by:
+            Filter
           </button>
 
           {showFilter && (
-            <div id="filterBar" className="p-2 rounded-xl space-y-4 w-auto">
+            <div id="filterBar" className="p-1 pt-3 rounded-xl space-y-4 w-auto">
               <div className="border-3 rounded-xl p-2 bg-gray-400">
                 <h2 className="text-lg">Grade:</h2>
                 {[
